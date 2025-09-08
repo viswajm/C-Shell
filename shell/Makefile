@@ -12,9 +12,10 @@ CFLAGS = -std=c99 \
 SRC_DIR = src
 OBJ_DIR = obj
 
+
 # Files
-SRCS = $(wildcard $(SRC_DIR)/*.c)
-OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
+SRCS = $(SRC_DIR)/shell.c $(SRC_DIR)/commands.c $(SRC_DIR)/parser.c
+OBJS = $(OBJ_DIR)/shell.o $(OBJ_DIR)/commands.o $(OBJ_DIR)/parser.o
 TARGET = shell.out
 
 # Default target

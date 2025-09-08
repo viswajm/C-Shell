@@ -1,4 +1,7 @@
 #include "../include/parser.h"
+#include <stdbool.h>
+#include <string.h>
+#include <ctype.h>
 
 // ---------------- Lexer ----------------
 typedef enum
@@ -30,27 +33,27 @@ typedef struct
     Token current;
 } Lexer;
 
-static void next_token(Lexer *lex);
+void next_token(Lexer *lex);
 
-static bool is_special(char c)
+bool is_special(char c)
 {
     return c == '|' || c == '&' || c == ';' || c == '<' || c == '>';
 }
 
-static void init_lexer(Lexer *lex, const char *input)
+void init_lexer(Lexer *lex, const char *input)
 {
     lex->input = input;
     lex->pos = 0;
     next_token(lex);
 }
 
-static void skip_ws(Lexer *lex)
+void skip_ws(Lexer *lex)
 {
     while (isspace((unsigned char)lex->input[lex->pos]))
         lex->pos++;
 }
 
-static void read_name(Lexer *lex, char *buf, size_t max)
+void read_name(Lexer *lex, char *buf, size_t max)
 {
     int i = 0;
     while (lex->input[lex->pos] &&
@@ -64,7 +67,7 @@ static void read_name(Lexer *lex, char *buf, size_t max)
     buf[i] = '\0';
 }
 
-static void next_token(Lexer *lex)
+void next_token(Lexer *lex)
 {
     skip_ws(lex);
     char c = lex->input[lex->pos];
@@ -158,7 +161,7 @@ typedef struct
     bool error;
 } Parser;
 
-static void consume(Parser *p, TokenType t)
+void consume(Parser *p, TokenType t)
 {
     if (p->lex.current.type == t)
     {
@@ -171,22 +174,22 @@ static void consume(Parser *p, TokenType t)
 }
 
 // Forward declarations
-static void parse_shell_cmd(Parser *p);
-static void parse_cmd_group(Parser *p);
-static void parse_atomic(Parser *p);
-static void parse_input(Parser *p);
-static void parse_output(Parser *p);
+void parse_shell_cmd(Parser *p);
+void parse_cmd_group(Parser *p);
+void parse_atomic(Parser *p);
+void parse_input(Parser *p);
+void parse_output(Parser *p);
 
 // shell_cmd -> cmd_group ((& | ;) cmd_group)* &?
 // shell_cmd -> cmd_group ((; cmd_group) | (& cmd_group))* &?
-static void parse_shell_cmd(Parser *p)
+void parse_shell_cmd(Parser *p)
 {
     parse_cmd_group(p);
 
     // loop for ; or & followed by cmd_group
     while (!p->error &&
            (p->lex.current.type == T_SEMI ||
-           (p->lex.current.type == T_AMP && p->lex.input[p->lex.pos] != '\0')))
+            (p->lex.current.type == T_AMP && p->lex.input[p->lex.pos] != '\0')))
     {
         TokenType op = p->lex.current.type;
         consume(p, op);
@@ -200,9 +203,8 @@ static void parse_shell_cmd(Parser *p)
     }
 }
 
-
 // cmd_group -> atomic (| atomic)*
-static void parse_cmd_group(Parser *p)
+void parse_cmd_group(Parser *p)
 {
     parse_atomic(p);
     while (!p->error && p->lex.current.type == T_PIPE)
@@ -213,7 +215,7 @@ static void parse_cmd_group(Parser *p)
 }
 
 // atomic -> name (name | input | output)*
-static void parse_atomic(Parser *p)
+void parse_atomic(Parser *p)
 {
     if (p->lex.current.type != T_NAME)
     {
@@ -244,7 +246,7 @@ static void parse_atomic(Parser *p)
 }
 
 // input -> < name | <name
-static void parse_input(Parser *p)
+void parse_input(Parser *p)
 {
     if (p->lex.current.type == T_LT)
     {
@@ -265,7 +267,7 @@ static void parse_input(Parser *p)
 }
 
 // output -> > name | >name | >> name | >>name
-static void parse_output(Parser *p)
+void parse_output(Parser *p)
 {
     if (p->lex.current.type == T_GT)
     {
@@ -305,6 +307,53 @@ bool validate_command(const char *input)
     if (!p.error && p.lex.current.type == T_END)
     {
         return true;
+    }
+    return false;
+}
+
+// Returns true if any atomic command's command name equals `name`.
+bool contains_atomic_command_name(const char *input, const char *name)
+{
+    Lexer lex;
+    init_lexer(&lex, input);
+
+    bool need_cmd_name = true; // expecting the first NAME of an atomic
+    while (1)
+    {
+        TokenType t = lex.current.type;
+        if (t == T_END)
+            break;
+
+        if (t == T_NAME)
+        {
+            if (need_cmd_name)
+            {
+                if (strcmp(lex.current.text, name) == 0)
+                {
+                    return true;
+                }
+                need_cmd_name = false;
+            }
+            next_token(&lex);
+        }
+        else if (t == T_PIPE || t == T_SEMI || t == T_AMP)
+        {
+            need_cmd_name = true; // next atomic starts
+            next_token(&lex);
+        }
+        else if (t == T_LT || t == T_GT || t == T_GTGT)
+        {
+            // skip redirection and its following name if present
+            next_token(&lex);
+            if (lex.current.type == T_NAME)
+            {
+                next_token(&lex);
+            }
+        }
+        else
+        {
+            next_token(&lex);
+        }
     }
     return false;
 }

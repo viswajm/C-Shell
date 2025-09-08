@@ -1,3 +1,6 @@
+#ifndef SHELL_H
+#define SHELL_H
+
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -5,8 +8,16 @@
 #include <limits.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <stdbool.h>
 
-int is_home_path(char *path, char *home);
-char *format_path(char *path, char *home);
+typedef struct Command {
+    char *name;
+    char **argv;
+    int argc;
+    char *input_file;
+    char *output_file;
+    bool append;
+    struct Command *pipe_next;
+} Command;
+
+#endif // SHELL_H
