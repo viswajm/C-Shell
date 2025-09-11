@@ -15,5 +15,9 @@ void set_shell_home(const char *home_path);
 void add_log(const char *cmd);
 int log_command(int argc, char **argv);
 void load_log(void);
+int activities_command(void);
+int fg_command(int argc, char **argv);
+int bg_command(int argc, char **argv);
+int ping_command(int argc, char **argv);
 
 #endif // COMMANDS_H

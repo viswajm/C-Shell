@@ -10,30 +10,19 @@ CFLAGS = -std=c99 \
 
 # Directories
 SRC_DIR = src
-OBJ_DIR = obj
-
 
 # Files
 SRCS = $(SRC_DIR)/shell.c $(SRC_DIR)/commands.c $(SRC_DIR)/parser.c
-OBJS = $(OBJ_DIR)/shell.o $(OBJ_DIR)/commands.o $(OBJ_DIR)/parser.o
 TARGET = shell.out
 
 # Default target
 all: $(TARGET)
 
-# Link step
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@
-
-# Compile step
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Ensure obj/ exists
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+# Compile all sources directly into executable
+$(TARGET): $(SRCS)
+	$(CC) $(CFLAGS) $(SRCS) -o $@
 
 # Clean
 clean:
-	rm -rf $(OBJ_DIR) $(TARGET)
+	rm -f $(TARGET)
 ############## LLM Generated Code Ends ################
