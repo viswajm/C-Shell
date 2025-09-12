@@ -1,4 +1,3 @@
-############## LLM Generated Code Begins ##############
 # Compiler and flags
 CC = gcc
 CFLAGS = -std=c99 \
@@ -25,4 +24,3 @@ $(TARGET): $(SRCS)
 # Clean
 clean:
 	rm -f $(TARGET)
-############## LLM Generated Code Ends ################

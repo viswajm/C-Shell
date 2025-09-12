@@ -451,7 +451,6 @@ Command *create_command()
 
     return cmd;
 }
-// ############### LLM Generated Code Begins ##############
 // Function to free a single Command struct
 void free_command(Command *cmd)
 {
@@ -840,7 +839,6 @@ Command *parse_input_to_commands(char *input)
     free(input_copy);
     return first_cmd;
 }
-// ############### LLM Generated Code Ends ################
 
 // Validate input/output files before execution
 int validate_command_files(Command *cmd)
@@ -1181,13 +1179,11 @@ int main()
     char hostname[HOST_NAME_MAX];
     char *username;
     char *home;
-    // ############## LLM Generated Code Begins ##############
     username = getenv("USER");
     if (!username)
     {
         username = getlogin();
     }
-    // ############## LLM Generated Code Ends ################
     gethostname(hostname, sizeof(hostname));
 
     if (getcwd(cwd, sizeof(cwd)) == NULL)
@@ -1226,7 +1222,6 @@ int main()
         printf("<%s@%s:%s> ", username, hostname, display_path);
         fflush(stdout);
 
-        // ############## LLM Generated Code Begins ##############
         char input[1024];
         
         // Clear any pending signals before reading input
@@ -1311,7 +1306,6 @@ int main()
             printf("Invalid Syntax!\n");
         }
         free(display_path);
-        // ############## LLM Generated Code Ends ################
     }
 
     free(home);
